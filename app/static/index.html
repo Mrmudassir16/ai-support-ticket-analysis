@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Ticket Analyzer | DOTMappers IT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --accent-emerald: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-rose: #f87171;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(129, 140, 248, 0.15) 0%, transparent 40%);
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-emerald);
+        }
+        .dot.warning { background-color: var(--accent-amber); }
+        .dot.error { background-color: var(--accent-rose); }
+
+        .query-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 28px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-blue), #0284c7);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0 24px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .sample-queries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sample-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .sample-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sample-pill:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent-blue);
+            color: var(--text-main);
+        }
+
+        .results-section {
+            display: none;
+            margin-bottom: 32px;
+        }
+
+        .answer-box {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+
+        }
+
+        .answer-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .answer-text {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .intent-details {
+            margin-top: 12px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.5);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .tag {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .tag-critical { background: rgba(248, 113, 113, 0.2); color: var(--accent-rose); border: 1px solid rgba(248, 113, 113, 0.3); }
+        .tag-high { background: rgba(251, 191, 36, 0.2); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .tag-resolved { background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald); border: 1px solid rgba(52, 211, 153, 0.3); }
+        .tag-open { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+
+        .anomaly-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-purple);
+            color: #fff;
+            border-color: var(--accent-purple);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .alert-bar {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: #fef08a;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="brand-icon">⚡</div>
+                <div class="brand-title">
+                    <h1>Support Ticket AI Analyzer</h1>
+                    <p>DOTMappers Assessment Prototype • Deterministic Pandas Execution</p>
+                </div>
+            </div>
+            <div class="status-badges">
+                <div class="badge" id="api-status-badge">
+                    <div class="dot warning"></div>
+                    <span id="api-status-text">Checking API Key...</span>
+                </div>
+                <div class="badge">
+                    <div class="dot"></div>
+                    <span>500 Rows Ingested</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="alert-container"></div>
+
+        <div class="query-card">
+            <form class="search-form" id="queryForm">
+                <input type="text" class="search-input" id="questionInput" placeholder="Ask a question about support tickets..." required>
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="btnText">Ask AI</span>
+                    <span id="btnSpinner" style="display: none;" class="spinner"></span>
+                </button>
+            </form>
+
+            <div class="sample-queries">
+                <span class="sample-label">Sample Queries:</span>
+                <span class="sample-pill" onclick="askSample('How many tickets are currently open?')">Open tickets count</span>
+                <span class="sample-pill" onclick="askSample('Which agent resolved the most tickets this month?')">Top agent this month</span>
+                <span class="sample-pill" onclick="askSample('Show me all Critical tickets not resolved within 12 hours.')">Slow Critical tickets</span>
+                <span class="sample-pill" onclick="askSample('What is the average customer rating for Technical category tickets?')">Technical avg rating</span>
+                <span class="sample-pill" onclick="askSample('How many critical tickets are unresolved?')">Unresolved critical count</span>
+                <span class="sample-pill" onclick="askSample('Which agent has the lowest average customer rating?')">Lowest rated agent</span>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="answer-box">
+                <div class="answer-title">Answer Result</div>
+                <div class="answer-text" id="answerText"></div>
+                <div class="intent-details" id="intentDetails"></div>
+            </div>
+
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead><tr id="tableHeader"></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="anomaly-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <h2>Anomaly Detection Engine</h2>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">IQR Outlier Detection & 24h SLA Violations</p>
+                </div>
+                <div class="tab-buttons">
+                    <button class="tab-btn active" id="btnLongRes" onclick="switchAnomalyTab('long')">Resolution Outliers (<span id="countLong">0</span>)</button>
+                    <button class="tab-btn" id="btnSla" onclick="switchAnomalyTab('sla')">Unresolved >24h (<span id="countSla">0</span>)</button>
+                    <button class="tab-btn" onclick="fetchAnomalies()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="anomalyTable">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Agent</th>
+                            <th>Category</th>
+                            <th>Metric</th>
+                            <th>Anomaly Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="anomalyTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let anomalyData = null;
+        let activeTab = 'long';
+
+        window.onload = function() {
+            checkHealth();
+            fetchAnomalies();
+        };
+
+        async function checkHealth() {
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                const badgeText = document.getElementById('api-status-text');
+                const badgeDot = document.querySelector('#api-status-badge .dot');
+
+                if (data.gemini_key_configured) {
+                    badgeText.innerText = `Gemini AI: Active (${data.gemini_model})`;
+                    badgeDot.className = 'dot';
+                } else {
+                    badgeText.innerText = `Gemini AI: Key Missing (Fallback Active)`;
+                    badgeDot.className = 'dot warning';
+                    showAlert('⚠️ GEMINI_API_KEY is not configured in .env file. Using deterministic heuristic fallback parser.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function showAlert(msg) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert-bar"><span>${msg}</span><span style="cursor:pointer" onclick="this.parentElement.remove()">✕</span></div>`;
+        }
+
+        function askSample(q) {
+            document.getElementById('questionInput').value = q;
+            submitQuery(q);
+        }
+
+        document.getElementById('queryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const q = document.getElementById('questionInput').value;
+            submitQuery(q);
+        });
+
+        async function submitQuery(question) {
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            btnText.innerText = 'Analyzing...';
+            btnSpinner.style.display = 'inline-block';
+
+            try {
+                const res = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+                const data = await res.json();
+                displayQueryResults(data);
+            } catch (err) {
+                alert('Query execution failed: ' + err);
+            } finally {
+                btnText.innerText = 'Ask AI';
+                btnSpinner.style.display = 'none';
+            }
+        }
+
+        function displayQueryResults(res) {
+            const sec = document.getElementById('resultsSection');
+            sec.style.display = 'block';
+
+            document.getElementById('answerText').innerText = res.answer;
+            document.getElementById('intentDetails').innerText = `Intent: ${JSON.stringify(res.intent?.operation)} | Pandas Expression: ${res.pandas_code_description || 'N/A'}`;
+
+            const headerRow = document.getElementById('tableHeader');
+            const bodyRow = document.getElementById('tableBody');
+            headerRow.innerHTML = '';
+            bodyRow.innerHTML = '';
+
+            if (!res.data || res.data.length === 0) {
+                headerRow.innerHTML = '<th>No matching rows found</th>';
+                return;
+            }
+
+            const keys = Object.keys(res.data[0]);
+            keys.forEach(k => {
+                headerRow.innerHTML += `<th>${k}</th>`;
+            });
+
+            res.data.forEach(row => {
+                let tr = '<tr>';
+                keys.forEach(k => {
+                    let val = row[k] !== null ? row[k] : '-';
+                    if (k === 'priority') {
+                        let cls = val === 'Critical' ? 'tag-critical' : (val === 'High' ? 'tag-high' : 'tag');
+                        val = `<span class="tag ${cls}">${val}</span>`;
+                    } else if (k === 'status') {
+                        let cls = val === 'Resolved' ? 'tag-resolved' : 'tag-open';
+                        val = `<span class="tag ${cls}">${val}</span>`;
+                    }
+                    tr += `<td>${val}</td>`;
+                });
+                tr += '</tr>';
+                bodyRow.innerHTML += tr;
+            });
+        }
+
+        async function fetchAnomalies() {
+            try {
+                const res = await fetch('/anomalies');
+                anomalyData = await res.json();
+                
+                document.getElementById('countLong').innerText = anomalyData.summary.long_resolution_count;
+                document.getElementById('countSla').innerText = anomalyData.summary.unresolved_high_priority_over_24h_count;
+
+                renderAnomalyTable();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function switchAnomalyTab(tab) {
+            activeTab = tab;
+            document.getElementById('btnLongRes').className = tab === 'long' ? 'tab-btn active' : 'tab-btn';
+            document.getElementById('btnSla').className = tab === 'sla' ? 'tab-btn active' : 'tab-btn';
+            renderAnomalyTable();
+        }
+
+        function renderAnomalyTable() {
+            if (!anomalyData) return;
+
+            const tbody = document.getElementById('anomalyTableBody');
+            tbody.innerHTML = '';
+
+            const items = activeTab === 'long' 
+                ? anomalyData.long_resolution_anomalies 
+                : anomalyData.unresolved_high_priority_anomalies;
+
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No anomalies detected.</td></tr>';
+                return;
+            }
+
+            items.forEach(item => {
+                const metricVal = activeTab === 'long' 
+                    ? `${item.resolution_time_hrs} hrs resolution` 
+                    : `${item.age_hrs} hrs old`;
+
+                let prioCls = item.priority === 'Critical' ? 'tag-critical' : 'tag-high';
+                let statCls = item.status === 'Resolved' ? 'tag-resolved' : 'tag-open';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.ticket_id}</strong></td>
+                        <td><span class="tag ${prioCls}">${item.priority}</span></td>
+                        <td><span class="tag ${statCls}">${item.status}</span></td>
+                        <td>${item.agent_id}</td>
+                        <td>${item.category}</td>
+                        <td><strong style="color: var(--accent-amber);">${metricVal}</strong></td>
+                        <td style="color: var(--text-muted); font-size: 12px;">${item.reason}</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
