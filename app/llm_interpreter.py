@@ -176,7 +176,8 @@ def _fallback_heuristic_intent(question: str) -> QueryIntent:
                 FilterModel(column="status", operator="==", value="Resolved"),
                 FilterModel(column="resolution_time_hrs", operator=">", value=48.15)
             ],
-            explanation="Filter resolved tickets exceeding the IQR resolution time anomaly threshold of 48.15 hours (Heuristic Fallback)"
+            time_filter=TimeFilterModel(period="latest_week"),
+            explanation="Filter resolved tickets in the latest week exceeding the IQR resolution time anomaly threshold of 48.15 hours (Heuristic Fallback)"
         )
 
     # General unresolved count

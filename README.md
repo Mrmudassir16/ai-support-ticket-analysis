@@ -221,7 +221,7 @@ Returns detected resolution time outliers (IQR) and SLA violations (>24h unresol
 | **"What is the average customer rating for Technical category tickets?"** | **3.74 / 5.0** | `df[df['category']=='Technical']['customer_rating'].mean()` |
 | **"How many critical tickets are unresolved?"** | **31 tickets** | `len(df[(df['priority']=='Critical') & (df['status']!='Resolved')])` |
 | **"Which agent has the lowest average customer rating?"** | **AGT-08 (3.48 rating)** | `df.groupby('agent_id')['customer_rating'].mean().sort_values()` |
-| **"Are there any anomalies in resolution times this week?"** | **21 outlier tickets** (>48.15h threshold) | `df[(df['status']=='Resolved') & (df['resolution_time_hrs']>48.15)]` |
+| **"Are there any anomalies in resolution times this week?"** | **5 outlier tickets** in latest week (`>48.15h` threshold) | `df[created_at in latest week & status=='Resolved' & resolution_time_hrs>48.15]` |
 
 ---
 
