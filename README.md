@@ -85,7 +85,6 @@ User Query (Natural Language)
 │   └── static/
 │       └── index.html      # Responsive UI interface
 ├── support_tickets.csv     # 500-row source dataset
-├── support_tickets.xlsx    # Reference dataset
 ├── .env.example            # Environment template
 ├── .gitignore              # Git ignore rules
 ├── requirements.txt        # Package dependencies
@@ -102,7 +101,7 @@ User Query (Natural Language)
 ### Step 1: Clone & Navigate
 ```bash
 git clone <your-repo-url>
-cd AI-Intern
+cd ai-support-ticket-analysis
 ```
 
 ### Step 2: Create Virtual Environment & Install Dependencies
@@ -110,7 +109,7 @@ cd AI-Intern
 python -m venv venv
 
 # Windows
-venv\Scripts\activate
+.\venv\Scripts\Activate.ps1
 
 # macOS / Linux
 source venv/bin/activate
