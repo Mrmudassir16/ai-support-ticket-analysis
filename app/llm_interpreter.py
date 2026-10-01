@@ -180,6 +180,18 @@ def _fallback_heuristic_intent(question: str) -> QueryIntent:
             explanation="Filter resolved tickets in the latest week exceeding the IQR resolution time anomaly threshold of 48.15 hours (Heuristic Fallback)"
         )
 
+    # Category grouping: "How many tickets are there per category?"
+    if "per category" in q or "by category" in q or ("category" in q and ("count" in q or "how many" in q or "breakdown" in q)):
+        return QueryIntent(
+            is_supported=True,
+            operation="group_by_aggregate",
+            group_by="category",
+            agg_func="count",
+            sort_by="count",
+            sort_ascending=False,
+            explanation="Group tickets by category and count total occurrences (Heuristic Fallback)"
+        )
+
     # General unresolved count
     if "unresolved" in q or "not resolved" in q:
         return QueryIntent(
